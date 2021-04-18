@@ -19,17 +19,26 @@
         object-fit: contain;
         margin: -1px;
     }
+
+    a {
+        color: white;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
 </style>
 
 <div class="p-grid p-ai-start">
     <div class="p-d-inline-flex p-flex-wrap p-col">
-        <h1>{{title}}{{#if year}} ({{year}}){{/if}}</h1>
+        <h1>{{title}}{{#if year}} ({{> print value=year field="year"}}){{/if}}</h1>
         {{> field label="Minutes" value=length }}
-        {{> field label="Directors" value=directors }}
-        {{> field label="Distributor" value=distributor }}
+        {{> field label="Directors" value=directors field="directors" }}
+        {{> field label="Distributor" value=distributor field="distributor" }}
         {{#if releaseDate}}{{> field label="Release Date" value=(date releaseDate "LL") }}{{/if}}
-        {{> field label="Genre" value=genre }}
-        {{> field label="Actors" value=actors }}
+        {{> field label="Genre" value=genre field="genre" }}
+        {{> field label="Actors" value=actors field="actors" }}
         {{> field label="Tagline" value=tagline multiline=true scenes=true}}
     </div>
 
@@ -58,10 +67,15 @@
             {{else}}
                 <label class="value">
                     {{#each value}}
-                        {{this}}{{#unless @last}}, {{/unless}}
-                    {{else}}{{value}}{{/each}}
+                        {{> print value=this field=../field}}
+                        {{#unless @last}}, {{/unless}}
+                    {{else}}
+                        {{> print value=value field=field}}
+                    {{/each}}
                 </label>
             {{/if}}
         </div>
     {{/if}}
 {{/inline}}
+
+{{#*inline "print"}}{{#if field}}<a href="#{{field}}={{value}}">{{value}}</a>{{else}}{{value}}{{/if}}{{/inline}}

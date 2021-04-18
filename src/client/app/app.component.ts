@@ -80,11 +80,17 @@ export class AppComponent implements OnInit, AfterViewInit {
         const viewportScrollable = document.getElementsByTagName('cdk-virtual-scroll-viewport');
         viewportScrollable[0].classList.add('p-datatable-scrollable-body');
 
-        this.route.queryParams.subscribe(params => {
-            const filters = Object.keys(params);
-            filters.forEach(filter => {
-                this.table.filters[filter] = {value: params[filter], matchMode: 'contains'};
+        this.route.fragment.subscribe(fragment => {
+            const params = new URLSearchParams(fragment || '');
+            const filters = [];
+
+            this.table.filters = {};
+            params.forEach((value, filter) => {
+                filters.push(filter);
+                this.table.filters[filter] = {value, matchMode: 'contains'};
             });
+            this.table._filter();
+
             this.loadData(filters);
         });
     }
