@@ -13,6 +13,7 @@ import {VideoDialogComponent} from './components/video-dialog.component';
 import {DomSanitizer} from '@angular/platform-browser';
 import {Menu} from 'primeng/menu';
 import {OverlayPanel} from 'primeng/overlaypanel';
+import {ActivatedRoute} from '@angular/router';
 
 @Pipe({
     name: 'safeHtml'
@@ -64,18 +65,32 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     constructor(private databaseService: DatabaseService,
                 private translateService: TranslateService,
-                private primengConfig: PrimeNGConfig) {
+                private primengConfig: PrimeNGConfig,
+                private route: ActivatedRoute) {
     }
 
     ngOnInit() {
         this.primengConfig.ripple = true;
-        this.loadData();
+        this.fields = JSON.parse(localStorage.getItem(LOCALSTORAGE_FIELDS));
     }
 
-    loadData() {
-        this.fields = JSON.parse(localStorage.getItem(LOCALSTORAGE_FIELDS));
+    ngAfterViewInit(): void {
+        // Workaround to make column resize work on table with virtual scroll enabled.
+        // see https://github.com/primefaces/primeng/issues/8885
+        const viewportScrollable = document.getElementsByTagName('cdk-virtual-scroll-viewport');
+        viewportScrollable[0].classList.add('p-datatable-scrollable-body');
 
-        this.databaseService.list(['urls', 'files'].concat(this.fields)).subscribe(data => {
+        this.route.queryParams.subscribe(params => {
+            const filters = Object.keys(params);
+            filters.forEach(filter => {
+                this.table.filters[filter] = {value: params[filter], matchMode: 'contains'};
+            });
+            this.loadData(filters);
+        });
+    }
+
+    loadData(filters: string[] = []) {
+        this.databaseService.list(['urls', 'files'].concat(this.fields, filters)).subscribe(data => {
             this.data = data;
 
             if (this.selection.length > 0) {
@@ -193,7 +208,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     columnsPanelHide() {
         if (this.fields !== this.selectedFields) {
             this.fields = this.selectedFields;
-            localStorage.setItem('fields', JSON.stringify(this.fields));
+            localStorage.setItem(LOCALSTORAGE_FIELDS, JSON.stringify(this.fields));
             this.loadData();
         }
     }
@@ -208,14 +223,5 @@ export class AppComponent implements OnInit, AfterViewInit {
                 this.detailEntry = lastSelected.$entry;
             });
         }
-    }
-
-    /**
-     * Workaround to make column resize work on table with virtual scroll enabled.
-     * see https://github.com/primefaces/primeng/issues/8885
-     */
-    ngAfterViewInit(): void {
-        const viewportScrollable = document.getElementsByTagName('cdk-virtual-scroll-viewport');
-        viewportScrollable[0].classList.add('p-datatable-scrollable-body');
     }
 }

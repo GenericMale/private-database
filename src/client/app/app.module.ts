@@ -40,6 +40,7 @@ import {DatabaseService} from './services/database.service';
 import {PluginService} from './services/plugin.service';
 import {VideoDialogComponent} from './components/video-dialog.component';
 import {ProgressService} from './services/progress.service';
+import {RouterModule} from '@angular/router';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -75,6 +76,7 @@ export function loadTranslation(translate: TranslateService) {
                 deps: [HttpClient]
             }
         }),
+        RouterModule.forRoot([]),
 
         TableModule,
         InputTextModule,
