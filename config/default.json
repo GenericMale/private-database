@@ -1,0 +1,35 @@
+{
+  "data": {
+    "path": ".data"
+  },
+  "server": {
+    "port": 80,
+    "address": "127.0.0.1"
+  },
+  "filescanner": {
+    "replacements": {
+      "\\.": " "
+    },
+    "separator": "_",
+    "extensions": [
+      "avi",
+      "divx",
+      "f4v",
+      "flv",
+      "m2ts",
+      "m4v",
+      "mkv",
+      "mov",
+      "mp4",
+      "mpeg",
+      "mpg",
+      "wmv"
+    ],
+    "regex": [
+      ".*/(?<title>[^_]*)(_(sc|cd)\\d*)?(_(?<actors_>.*))?_\\d*\\..*",
+      ".*/(?<title>[^_]*)(_(sc|cd)\\d*)?(_(?<actors_>.*))?\\..*"
+    ],
+    "grouping": "title",
+    "directory": "Y:\\Movies"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": "../../dist/server",
+    "module": "commonjs",
+    "baseUrl": "./",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es6",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "types": [
+      "reflect-metadata"
+    ]
+  }
+}

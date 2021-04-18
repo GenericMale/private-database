@@ -1,0 +1,20 @@
+# source files
+/src
+
+# dependencies
+/node_modules
+npm-debug.log
+
+# IDEs and editors
+.idea/
+.c9/
+.settings/
+.project
+.vscode/
+.classpath
+*.launch
+*.sublime-workspace
+
+# System Files
+.DS_Store
+Thumbs.db

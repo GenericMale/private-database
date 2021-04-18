@@ -1,0 +1,24 @@
+# compiled output & data
+/dist
+/.data
+
+# dependencies
+/node_modules
+npm-debug.log
+ffmpeg.exe
+ffprobe.exe
+
+# IDEs and editors
+.idea/
+.c9/
+.settings/
+.project
+.vscode/
+.classpath
+*.launch
+*.sublime-workspace
+*.iml
+
+# System Files
+.DS_Store
+Thumbs.db

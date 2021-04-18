@@ -1,0 +1,34 @@
+{
+  "CreateButtonLabel": "Create New",
+  "ExtendButtonLabel": "Extend",
+  "DeleteButtonLabel": "Delete",
+  "OpenButtonLabel": "Open",
+  "PlayButtonLabel": "Play",
+  "ExportButtonLabel": "Export",
+  "ColumnsButtonTooltip": "Toggle Visible Columns",
+  "FilterRowButtonTooltip": "Toggle Filter Row",
+  "DetailsButtonLabel": "Details",
+
+  "FilterInputPlaceholder": "Filter",
+  "FilterColumnInputPlaceholder": "Filter by {{header}}",
+
+  "SearchDialogHeader": "Search",
+  "SaveButtonLabel": "Save",
+  "SkipSearchSwitchLabel": "Automatically select for others",
+  "SkipButtonLabel": "Skip",
+  "BackButtonLabel": "Back",
+  "SearchButtonLabel": "Search",
+  "PluginDropdownLabel": "Plugin",
+  "InputRequiredText": "The value is required.",
+  "ErrorDialogSummary": "Error",
+  "NoResultsDialogDetail": "No results found",
+
+  "title": "Title",
+  "year": "Year",
+  "distributor": "Distributor",
+  "actors": "Actors",
+  "genre": "Genre",
+  "allMale": "All-Male",
+  "directory": "Directory",
+  "files": "Files"
+}

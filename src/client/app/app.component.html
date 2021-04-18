@@ -1,0 +1,114 @@
+<p-toolbar>
+    <div class="p-toolbar-group-left">
+        <button pButton pRipple [label]="'CreateButtonLabel' | translate"
+                icon="pi pi-plus" class="p-button-rounded p-button-outlined p-mr-2 p-button-success"
+                (click)="createClick()"></button>
+
+        <button pButton pRipple [label]="'ExtendButtonLabel' | translate"
+                icon="pi pi-download" class="p-button-rounded p-button-outlined p-mr-2 p-button-warning"
+                [disabled]="!selection.length"
+                (click)="extendClick()"></button>
+
+        <button pButton pRipple [label]="'DeleteButtonLabel' | translate"
+                icon="pi pi-trash" class="p-button-rounded p-button-outlined p-mr-4 p-button-danger"
+                [disabled]="!selection.length"
+                (click)="deleteClick()"></button>
+
+        <button pButton pRipple [label]="'OpenButtonLabel' | translate"
+                icon="pi pi-external-link" class="p-button-rounded p-button-outlined p-mr-2"
+                [disabled]="selection.length !== 1 || !selection[0].urls"
+                (click)="openURLButtonClick(openURLMenu, $event)"></button>
+
+        <button pButton pRipple [label]="'PlayButtonLabel' | translate"
+                icon="pi pi-play" class="p-button-rounded p-button-outlined p-mr-2"
+                [disabled]="selection.length !== 1 || !selection[0].files"
+                (click)="openVideo()"></button>
+
+        <button pButton pRipple [label]="'ExportButtonLabel' | translate"
+                icon="pi pi-save" class="p-button-rounded p-button-outlined p-mr-4"
+                (click)="dt.exportCSV()"></button>
+
+        <button pButton pRipple [label]="'DetailsButtonLabel' | translate"
+                icon="pi pi-id-card" [class.p-button-outlined]="!showDetails" class="p-button-rounded p-button-help p-mr-4"
+                (click)="detailsClick()"></button>
+    </div>
+
+    <p-menu #openURLMenu [popup]="true" [model]="getURLModel()" [style]="{width: 'auto'}"></p-menu>
+    <p-overlayPanel #columnsPanel styleClass="column-panel" (onHide)="columnsPanelHide()">
+        <ng-template pTemplate>
+            <p-listbox [options]="allFields" [(ngModel)]="selectedFields" optionLabel="field"
+                       [listStyle]="{'max-height':'300px'}"
+                       [metaKeySelection]="false" [checkbox]="true" [multiple]="true" [showToggleAll]="false">
+                <ng-template let-field pTemplate="item">
+                    {{field.value | translate}}
+                </ng-template>
+            </p-listbox>
+        </ng-template>
+    </p-overlayPanel>
+
+    <div class="p-toolbar-group-right">
+        <div class="p-inputgroup">
+            <input pInputText type="text" [placeholder]="'FilterInputPlaceholder' | translate"
+                   (input)="dt.filterGlobal($event.target.value, 'contains')"
+                   [value]="dt.filters['global']?.value">
+
+            <button pButton pRipple [title]="'FilterRowButtonTooltip' | translate"
+                    icon="pi pi-filter" [class.p-button-outlined]="!showFilterRow"
+                    (click)="showFilterRow = !showFilterRow"></button>
+
+            <button pButton pRipple [title]="'ColumnsButtonTooltip' | translate"
+                    icon="pi pi-th-large" class="p-button-outlined"
+                    (click)="columnsButtonClick($event)"></button>
+        </div>
+    </div>
+</p-toolbar>
+
+<div class="content-section">
+    <as-split useTransition="true" unit="pixel" gutterSize="25">
+        <as-split-area size="*">
+            <p-table #dt styleClass="p-datatable-sm p-datatable-striped"
+                     [columns]="fields" [value]="data"
+                     [scrollable]="true" [rows]="100" scrollHeight="flex" [virtualScroll]="true"
+                     [resizableColumns]="true" [reorderableColumns]="true"
+                     selectionMode="multiple" [selection]="selection" (selectionChange)="selectionChange($event)" [metaKeySelection]="true" dataKey="$entry"
+                     [globalFilterFields]="fields" filterDelay="0">
+                <!-- stateStorage="local" stateKey="main-table" (onStateRestore)="stateRestore(dt)" -->
+                <ng-template pTemplate="colgroup">
+                    <colgroup>
+                        <col *ngFor="let field of fields">
+                    </colgroup>
+                </ng-template>
+                <ng-template pTemplate="header" let-fields>
+                    <tr>
+                        <th *ngFor="let field of fields" [pSortableColumn]="field" pResizableColumn
+                            pReorderableColumn>
+                            {{field | translate}}
+                            <p-sortIcon [field]="field"></p-sortIcon>
+                        </th>
+                    </tr>
+                    <tr *ngIf="showFilterRow">
+                        <th *ngFor="let field of fields">
+                            <input pInputText type="text" class="p-column-filter"
+                                   (input)="dt.filter($event.target.value, field, 'contains')"
+                                   [value]="dt.filters[field]?.value"
+                                   [placeholder]="'FilterColumnInputPlaceholder'|translate: {header: (field | translate)}">
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex" let-fields="columns">
+                    <tr [pSelectableRow]="rowData" [pSelectableRowIndex]="rowIndex" (dblclick)="rowDoubleClick(rowData)">
+                        <td *ngFor="let field of fields">
+                            {{rowData[field]}}
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+        </as-split-area>
+        <as-split-area size="600" [visible]="showDetails && selection.length > 0" [innerHTML]="detailPage | safeHtml"></as-split-area>
+    </as-split>
+</div>
+
+<pdb-search-dialog></pdb-search-dialog>
+<pdb-video-dialog></pdb-video-dialog>
+<p-toast></p-toast>

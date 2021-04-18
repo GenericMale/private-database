@@ -1,0 +1,85 @@
+<p-dialog [header]="'SearchDialogHeader' | translate" [style]="{width: '768px'}"
+          [visible]="visible" (visibleChange)="visibleChange($event)"
+          [modal]="true" [resizable]="false">
+
+    <form [hidden]="results !== null" #form="ngForm" class="p-fluid p-p-3">
+        <div class="p-field">
+            <label for="plugin" translate="PluginDropdownLabel"></label>
+            <p-dropdown id="plugin" name="plugin" [options]="plugins"
+                        [(ngModel)]="selectedPlugin" (onChange)="pluginChange()"
+                        optionLabel="label" appendTo="body"></p-dropdown>
+        </div>
+
+        <div *ngFor="let param of selectedPlugin?.searchParameters" class="p-field">
+            <label [for]="param.name" [translate]="param.name"></label>
+            <input pInputText [id]="param.name" [name]="param.name" [(ngModel)]="searchParams[param.name]"
+                   [required]="param.required ? 'required' : null">
+            <small class="p-invalid" translate="InputRequiredText"
+                   [hidden]="form.controls[param.name]?.valid || form.controls[param.name]?.pristine"></small>
+        </div>
+
+        <div *ngIf="skipSearch === true || skipSearch === false" class="p-field-checkbox">
+            <p-inputSwitch id="skip" name="skip" [(ngModel)]="skipSearch"></p-inputSwitch>
+            <label for="skip" translate="SkipSearchSwitchLabel"></label>
+        </div>
+    </form>
+
+    <p-table [hidden]="results === null" styleClass="p-datatable-sm p-datatable-striped"
+             [columns]="columns" [value]="results"
+             [scrollable]="true" scrollHeight="500px"
+             [resizableColumns]="true" [reorderableColumns]="true"
+             [(selection)]="selection">
+        <ng-template pTemplate="colgroup" let-columns>
+            <colgroup>
+                <col style="width:4rem">
+                <col *ngFor="let col of columns">
+                <col style="width:3rem">
+            </colgroup>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th>
+                    <p-tableHeaderCheckbox *ngIf="!selectedEntry"></p-tableHeaderCheckbox>
+                </th>
+                <th *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn pReorderableColumn>
+                    {{col.header}}
+                    <p-sortIcon [field]="col.field"></p-sortIcon>
+                </th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+            <tr>
+                <td>
+                    <p-tableCheckbox *ngIf="!selectedEntry" [value]="rowData"></p-tableCheckbox>
+                    <p-tableRadioButton *ngIf="selectedEntry" [value]="rowData"></p-tableRadioButton>
+                </td>
+                <td *ngFor="let col of columns">
+                    {{rowData[col.field]}}
+                </td>
+                <td class="open-link-button" *ngIf="rowData.urls">
+                    <button pButton (click)="externalClick(rowData)"
+                            icon="pi pi-external-link" class="p-button-text"></button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <p-footer>
+        <button *ngIf="results === null"
+                pButton pRipple [label]="'SearchButtonLabel' | translate"
+                [disabled]="!form.form.valid"
+                (click)="searchClick()"></button>
+
+        <button *ngIf="results !== null"
+                pButton pRipple [label]="'BackButtonLabel' | translate"
+                (click)="backClick()"></button>
+        <button *ngIf="results !== null && (skipSearch === true || skipSearch === false)"
+                pButton pRipple [label]="'SkipButtonLabel' | translate"
+                (click)="skipClick()"></button>
+        <button *ngIf="results !== null"
+                pButton pRipple [label]="'SaveButtonLabel' | translate"
+                [disabled]="!selection"
+                (click)="saveClick()"></button>
+    </p-footer>
+</p-dialog>

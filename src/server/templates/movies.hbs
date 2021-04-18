@@ -1,0 +1,67 @@
+<style>
+    h1 {
+        width: 100%;
+    }
+
+    .label {
+        font-weight: bold;
+        border-bottom: 1px solid #3f4b5b;
+    }
+
+    .poster {
+        max-width: 240px;
+        object-fit: contain;
+    }
+
+    .screenshot {
+        max-width: 250px;
+        max-height: 140px;
+        object-fit: contain;
+        margin: -1px;
+    }
+</style>
+
+<div class="p-grid p-ai-start">
+    <div class="p-d-inline-flex p-flex-wrap p-col">
+        <h1>{{title}}{{#if year}} ({{year}}){{/if}}</h1>
+        {{> field label="Minutes" value=length }}
+        {{> field label="Directors" value=directors }}
+        {{> field label="Distributor" value=distributor }}
+        {{#if releaseDate}}{{> field label="Release Date" value=(date releaseDate "LL") }}{{/if}}
+        {{> field label="Genre" value=genre }}
+        {{> field label="Actors" value=actors }}
+        {{> field label="Tagline" value=tagline multiline=true scenes=true}}
+    </div>
+
+    {{#if poster}}
+        <img class="poster p-mt-4 p-mr-4 p-shadow-4" src="{{poster}}" alt="{{title}}"/>
+    {{/if}}
+</div>
+
+<div class="screenshots">
+{{#each screenshots}}
+    <img class="screenshot p-shadow-4" src="{{this}}" alt="screenshot_{{@index}}"/>
+{{/each}}
+</div>
+
+{{#*inline "field"}}
+    {{#if value}}
+        <div class="p-field p-mb-4 p-mr-6 field">
+            <div class="p-mb-1 label">{{i18n label}}</div>
+
+            {{#if multiline}}
+                {{#each value}}
+                    <div class="value{{#unless @last}} p-mb-1{{/unless}}">
+                        {{#if ../scenes}}{{i18n "Scene"}} {{add @index 1}}. {{/if}}{{this}}
+                    </div>
+                {{/each}}
+            {{else}}
+                <label class="value">
+                    {{#each value}}
+                        {{this}}{{#unless @last}}, {{/unless}}
+                    {{else}}{{value}}{{/each}}
+                </label>
+            {{/if}}
+        </div>
+    {{/if}}
+{{/inline}}

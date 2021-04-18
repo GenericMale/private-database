@@ -1,0 +1,16 @@
+<p-dialog [header]="title" [(visible)]="visible" [modal]="false" [resizable]="true" contentStyleClass="video-dialog">
+    <p-header>
+        <span class="p-buttonset p-mr-2 p-ml-6">
+            <button pButton pRipple icon="pi pi-backward" class="p-button-outlined"
+                    [disabled]="!videos[currentVideo - 1]"
+                    (click)="playPreviousVideo()"></button>
+            <button pButton pRipple icon="pi pi-forward" class="p-button-outlined"
+                    [disabled]="!videos[currentVideo + 1]"
+                    (click)="playNextVideo()"></button>
+        </span>
+        <button pButton pRipple
+                icon="pi pi-external-link" class="p-button-outlined p-mr-2"
+                (click)="openExternal()"></button>
+    </p-header>
+    <video controls autoPlay crossOrigin="anonymous" [src]="videoUrl" (ended)="playNextVideo()"></video>
+</p-dialog>
