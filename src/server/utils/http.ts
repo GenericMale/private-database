@@ -1,39 +1,38 @@
-import * as request from 'request';
-import * as cheerio from 'cheerio';
-import * as fs from 'fs';
+import puppeteerExtra from 'puppeteer-extra';
+import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
-export function load(url: string): Promise<cheerio.Root> {
-    return new Promise((resolve, reject) => {
-        request.get(url, {
-            gzip: true,
-            headers: {
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Encoding': 'gzip',
-                'Connection': 'keep-alive',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0'
-            }
-        }, (error, response, body) => {
-            resolve(cheerio.load(body));
-        });
-    });
+import * as puppeteer from 'puppeteer';
+import * as cheerio from 'cheerio';
+import * as fs from 'fs/promises';
+
+let browser: puppeteer.Browser;
+
+async function newPage() {
+    if (!browser) {
+        puppeteerExtra.use(AdblockerPlugin()).use(StealthPlugin());
+        browser = await puppeteerExtra.launch();
+    }
+    return await browser.newPage();
 }
 
-export function downloadImage(url: string, filePath: string): Promise<string> {
-    let file = fs.createWriteStream(filePath);
-    return new Promise((resolve, reject) => {
-        request.get(url, {
-            gzip: true,
-            headers: {
-                'Accept': 'image/webp,*/*',
-                'Accept-Encoding': 'gzip',
-                'Connection': 'keep-alive',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0'
-            }
-        })
-            .pipe(file)
-            .on('finish', () => resolve(filePath))
-            .on('error', (err) => reject(err));
-    });
+export async function load(target: string): Promise<cheerio.Root> {
+    let page = await newPage();
+    await page.goto(target);
+    let content = await page.content();
+    await page.close();
+
+    return cheerio.load(content);
+}
+
+export async function downloadImage(target: string, filePath: string): Promise<string> {
+    let page = await newPage();
+    let viewSource = await page.goto(target);
+    let buffer = await viewSource.buffer();
+    await fs.writeFile(filePath, buffer);
+    await page.close();
+
+    return filePath;
 }
 
 export default load;
