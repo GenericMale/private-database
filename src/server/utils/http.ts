@@ -1,37 +1,31 @@
-import puppeteerExtra from 'puppeteer-extra';
-import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-
 import * as puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 import * as fs from 'fs/promises';
 
-let browser: puppeteer.Browser;
+let page: puppeteer.Page;
 
-async function newPage() {
-    if (!browser) {
-        puppeteerExtra.use(AdblockerPlugin()).use(StealthPlugin());
-        browser = await puppeteerExtra.launch();
+export async function goto(target: string): Promise<puppeteer.HTTPResponse | null> {
+    if (!page || page.isClosed()) {
+        const browser = await puppeteer.launch({headless: false, ignoreHTTPSErrors: true});
+        page = (await browser.pages())[0];
+        await page.setRequestInterception(true);
+        page.on('request', (request) => {
+            request.resourceType() === 'document' ? request.continue() : request.abort();
+        });
     }
-    return await browser.newPage();
+    return page.goto(target);
 }
 
 export async function load(target: string): Promise<cheerio.Root> {
-    let page = await newPage();
-    await page.goto(target);
-    let content = await page.content();
-    await page.close();
-
+    const response = await goto(target);
+    const content = await response.text();
     return cheerio.load(content);
 }
 
 export async function downloadImage(target: string, filePath: string): Promise<string> {
-    let page = await newPage();
-    let viewSource = await page.goto(target);
-    let buffer = await viewSource.buffer();
+    const response = await goto(target);
+    const buffer = await response.buffer();
     await fs.writeFile(filePath, buffer);
-    await page.close();
-
     return filePath;
 }
 

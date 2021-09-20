@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import cheerio from 'cheerio';
 import {DetailResult, Plugin, SearchParameterDefinition, SearchParameters, SearchResult} from '../types';
 
-const BASE_URL = 'http://www.iafd.com/results.asp?searchtype=comprehensive&searchstring=';
+const BASE_URL = 'https://www.iafd.com/results.asp?searchtype=comprehensive&searchstring=';
 
 export class IAFDPlugin implements Plugin {
 

@@ -58,10 +58,7 @@
     "primeflex": "^2.0.0",
     "primeicons": "^4.0.0",
     "primeng": "^10.0.3",
-    "puppeteer": "^5.5.0",
-    "puppeteer-extra": "^3.1.18",
-    "puppeteer-extra-plugin-adblocker": "^2.11.11",
-    "puppeteer-extra-plugin-stealth": "^2.7.10",
+    "puppeteer": "^10.2.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.3",
     "zone.js": "^0.11.2"
