@@ -29,19 +29,18 @@ export class PluginController implements interfaces.Controller {
     }
 
     @httpGet('/:plugin/search')
-    public search(@requestParam('plugin') plugin: string,
+    public async search(@requestParam('plugin') plugin: string,
                   @request() req: express.Request): Promise<SearchResult[]> {
         return this.pluginService.search(plugin, req.query as any);
     }
 
     @httpPost('/:plugin/details')
-    public saveDetails(@requestParam('plugin') plugin: string,
+    public async saveDetails(@requestParam('plugin') plugin: string,
                        @requestBody() searchResult: SearchResult,
                        @queryParam('entry') entry?: string): Promise<string> {
-        return this.pluginService.getDetails(plugin, searchResult).then((details) => {
-            details.$plugin = plugin;
-            return this.dbService.create(details, entry);
-        });
+        const details = await this.pluginService.getDetails(plugin, searchResult);
+        details.$plugin = plugin;
+        return this.dbService.create(details, entry);
     }
 
 }

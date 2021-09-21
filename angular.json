@@ -54,7 +54,8 @@
             "extractLicenses": false,
             "allowedCommonJsDependencies": [
               "zone.js/dist/zone"
-            ]
+            ],
+            "optimization": false
           },
           "configurations": {
             "production": {
@@ -67,16 +68,27 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "vendorChunk": false,
               "buildOptimizer": true
             }
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
-  "defaultProject": "private-database"
+  "defaultProject": "private-database",
+  "cli": {
+    "defaultCollection": "@angular-eslint/schematics"
+  }
 }

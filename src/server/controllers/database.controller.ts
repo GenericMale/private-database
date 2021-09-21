@@ -22,7 +22,7 @@ export class DatabaseController implements interfaces.Controller {
     private dbService: DatabaseService;
 
     @httpGet('/')
-    public list(@request() req: express.Request,
+    public async list(@request() req: express.Request,
                 @response() res: express.Response,
                 @queryParam('field') fields: string[] | string): Promise<Entry[]> {
         if (this.isModified(req, res)) {
@@ -31,7 +31,7 @@ export class DatabaseController implements interfaces.Controller {
     }
 
     @httpGet('/fields')
-    public getFields(@request() req: express.Request,
+    public async getFields(@request() req: express.Request,
                      @response() res: express.Response): Promise<string[]> {
         if (this.isModified(req, res)) {
             return this.dbService.getFields();
@@ -39,7 +39,7 @@ export class DatabaseController implements interfaces.Controller {
     }
 
     @httpGet('/:id')
-    private get(@request() req: express.Request,
+    private async get(@request() req: express.Request,
                 @response() res: express.Response,
                 @requestParam('id') id: string,
                 @queryParam('plugin') plugin?: string): Promise<Entry> {
@@ -61,18 +61,18 @@ export class DatabaseController implements interfaces.Controller {
     }
 
     @httpDelete('/:id')
-    private remove(@requestParam('id') id: string,
-                   @queryParam('plugin') plugin?: string): void {
-        this.dbService.remove(id, plugin);
+    private async remove(@requestParam('id') id: string,
+                   @queryParam('plugin') plugin?: string): Promise<void> {
+        await this.dbService.remove(id, plugin);
     }
 
     @httpPost('/')
-    public save(@requestBody() details: DetailResult,
+    public async save(@requestBody() details: DetailResult,
                 @queryParam('entry') entry?: string): Promise<string> {
         return this.dbService.create(details, entry);
     }
 
-    private render(res: express.Response, template: string, options = {}) {
+    private async render(res: express.Response, template: string, options = {}) {
         return new Promise<string>((resolve, reject) => {
             res.render(template, options, (err, compiled) => {
                 if (err) {

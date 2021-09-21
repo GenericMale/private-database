@@ -75,12 +75,9 @@ body {
     overflow: hidden;
 }
 
-.p-dialog .p-dialog-content {
-    padding: 0;
-}
-
 .p-dialog .video-dialog {
     overflow: hidden;
+    padding: 0;
 }
 
 .video-dialog video {

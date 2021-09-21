@@ -14,6 +14,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {Menu} from 'primeng/menu';
 import {OverlayPanel} from 'primeng/overlaypanel';
 import {ActivatedRoute} from '@angular/router';
+import {ObjectUtils} from 'primeng/utils';
 
 @Pipe({
     name: 'safeHtml'
@@ -122,7 +123,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     extendClick() {
         let skip = this.selection.length > 1 ? false : undefined;
         from(this.selection).pipe(concatMap(selected =>
-            this.searchDialog.show(selected, skip).pipe(tap((data) => skip = data.skip ))
+            this.searchDialog.show(selected, skip).pipe(tap((data) => skip = data.skip))
         ), toArray()).subscribe(() => {
             this.loadData();
         });
@@ -135,9 +136,28 @@ export class AppComponent implements OnInit, AfterViewInit {
         });
     }
 
-    stateRestore(dt: Table) {
-        this.showFilterRow = this.fields.some(field => dt.filters[field] && dt.filters[field].value);
+    exportClick() {
+        const header = this.fields.map(column => `"${this.translateService.instant(column)}"`).join(',');
+        const body = this.data.map(record => this.fields.map(column => {
+            let cellData = ObjectUtils.resolveFieldData(record, column);
+            cellData = cellData != null ? String(cellData).replace(/"/g, '""') : '';
+            return `"${cellData}"`;
+        }).join(',')).join('\n');
+
+        const link = document.createElement('a');
+        const href = URL.createObjectURL(new Blob([`${header}\n${body}`], {type: 'text/csv;charset=utf-8;'}));
+        link.setAttribute('href', href);
+        link.setAttribute('download', 'export.csv');
+        link.style.display = 'none';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
+
+    /*stateRestore(dt: Table) {
+        this.showFilterRow = this.fields.some(field => dt.filters[field] && dt.filters[field].value);
+    }*/
 
     getURLModel() {
         if (this.selection.length === 0 || !Array.isArray(this.selection[0].urls)) {

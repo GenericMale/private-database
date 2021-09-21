@@ -30,8 +30,8 @@
     }
 </style>
 
-<div class="p-grid p-ai-start">
-    <div class="p-d-inline-flex p-flex-wrap p-col">
+<div class="grid align-items-start">
+    <div class="inline-flex flex-wrap col">
         <h1>{{title}}{{#if year}} ({{> print value=year field="year"}}){{/if}}</h1>
         {{> field label="Minutes" value=length }}
         {{> field label="Directors" value=directors field="directors" }}
@@ -43,24 +43,24 @@
     </div>
 
     {{#if poster}}
-        <img class="poster p-mt-4 p-mr-4 p-shadow-4" src="{{poster}}" alt="{{title}}"/>
+        <img class="poster mt-4 mr-4 shadow-4" src="{{poster}}" alt="{{title}}"/>
     {{/if}}
 </div>
 
 <div class="screenshots">
 {{#each screenshots}}
-    <img class="screenshot p-shadow-4" src="{{this}}" alt="screenshot_{{@index}}"/>
+    <img class="screenshot shadow-4" src="{{this}}" alt="screenshot_{{@index}}"/>
 {{/each}}
 </div>
 
 {{#*inline "field"}}
     {{#if value}}
-        <div class="p-field p-mb-4 p-mr-6 field">
-            <div class="p-mb-1 label">{{i18n label}}</div>
+        <div class="field mb-4 mr-6">
+            <div class="mb-1 label">{{i18n label}}</div>
 
             {{#if multiline}}
                 {{#each value}}
-                    <div class="value{{#unless @last}} p-mb-1{{/unless}}">
+                    <div class="value{{#unless @last}} mb-1{{/unless}}">
                         {{#if ../scenes}}{{i18n "Scene"}} {{add @index 1}}. {{/if}}{{this}}
                     </div>
                 {{/each}}

@@ -21,15 +21,11 @@ export class ScreenshotPlugin implements Plugin {
         required: true
     }];
 
-    search(params: SearchParameters): Promise<ScreenshotSearchResult[]> {
-        return new Promise<ScreenshotSearchResult[]>((resolve) => {
-            resolve([{
-                files: params.files as string[]
-            }]);
-        });
+    async search(params: SearchParameters): Promise<ScreenshotSearchResult[]> {
+        return Promise.resolve([{files: params.files as string[]}]);
     }
 
-    getDetails(searchResult: ScreenshotSearchResult): Promise<ScreenshotDetailResult> {
+    async getDetails(searchResult: ScreenshotSearchResult): Promise<ScreenshotDetailResult> {
         const files = searchResult.files;
         const count = Math.ceil(this.frames / files.length);
 
@@ -45,10 +41,10 @@ export class ScreenshotPlugin implements Plugin {
                         return reject(err);
                     }
 
-                    let filename = path.basename(file, path.extname(file));
+                    const filename = path.basename(file, path.extname(file));
                     Promise.all(Array.from({length: count}, (v, i) => {
-                        let time = Math.round((i + 0.5) * stat.format.duration / count);
-                        let output = `${filename}_${i}.jpeg`;
+                        const time = Math.round((i + 0.5) * stat.format.duration / count);
+                        const output = `${filename}_${i}.jpeg`;
                         return new Promise<string>((res, rej) => {
                             ffmpeg(file)
                                 .setStartTime(time)
@@ -69,10 +65,11 @@ export class ScreenshotPlugin implements Plugin {
             });
         });
 
-        return Promise.all(promises).then((screenshots) => ({
+        const screenshots = await Promise.all(promises);
+        return {
             files,
-            screenshots: [].concat.apply([], screenshots)
-        }));
+            screenshots: [].concat(...screenshots)
+        };
     }
 }
 

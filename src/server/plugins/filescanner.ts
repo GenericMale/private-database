@@ -37,7 +37,7 @@ export class FileScannerPlugin implements Plugin {
         name: 'directory',
         type: 'STRING',
         required: true,
-        // @ts-ignore
+        // @ts-ignore: injected
         default: this.defaultDir
     }, {
         name: 'title',
@@ -45,9 +45,9 @@ export class FileScannerPlugin implements Plugin {
         required: false
     }];
 
-    search(params: SearchParameters): Promise<FileScannerSearchResult[]> {
+    async search(params: SearchParameters): Promise<FileScannerSearchResult[]> {
         return new Promise((resolve) => {
-            const pattern = params.title ? `**/*${params.title}*` : '**/*';
+            const pattern = params.title ? `**/*${params.title as string}*` : '**/*';
             glob(pattern, {cwd: params.directory as string, nodir: true, absolute: true, nocase: true}, (err, files) => {
                 let results = files
                     .filter((file) =>
@@ -55,7 +55,7 @@ export class FileScannerPlugin implements Plugin {
                     )
                     .map((file) => this.parseFileName(file)).filter((v) => v !== null);
                 if (this.grouping) {
-                    let grouped = _.groupBy(results, this.grouping as string);
+                    const grouped = _.groupBy(results, this.grouping);
                     results = [];
                     _.forOwn(grouped, (group) => {
                         results.push(this.merge(group));
@@ -66,16 +66,16 @@ export class FileScannerPlugin implements Plugin {
         });
     }
 
-    getDetails(searchResult: FileScannerSearchResult): Promise<FileScannerDetailResult> {
-        let promises = searchResult.files.map((file) => {
+    async getDetails(searchResult: FileScannerSearchResult): Promise<FileScannerDetailResult> {
+        const promises = searchResult.files.map((file) => {
             return new Promise((resolve, reject) => {
                 ffmpeg(file).ffprobe((err, stat) => {
                     if (err) {
                         return reject(err);
                     }
 
-                    let audio = stat.streams && stat.streams.find((stream) => stream.codec_type === 'audio');
-                    let video = stat.streams && stat.streams.find((stream) => stream.codec_type === 'video');
+                    const audio = stat.streams && stat.streams.find((stream) => stream.codec_type === 'audio');
+                    const video = stat.streams && stat.streams.find((stream) => stream.codec_type === 'video');
                     resolve(Object.assign(searchResult, {
                         duration: Math.round(stat.format.duration),
                         size: stat.format.size,
@@ -89,18 +89,17 @@ export class FileScannerPlugin implements Plugin {
             });
         });
 
-        return Promise.all(promises).then((results: any[]) => {
-            return Object.assign(this.merge(results), {
-                duration: _.sumBy(results, 'duration'),
-                size: _.sumBy(results, 'size'),
-                bitrate: _.meanBy(results, 'bitrate')
-            });
+        const results: any[] = await Promise.all(promises);
+        return Object.assign(this.merge(results), {
+            duration: _.sumBy(results, 'duration'),
+            size: _.sumBy(results, 'size'),
+            bitrate: _.meanBy(results, 'bitrate')
         });
     }
 
     private parseFileName(file: string) {
         file = file.replace(/\\/g, '/'); // always use forward slashes
-        let result: FileScannerSearchResult = {
+        const result: FileScannerSearchResult = {
             files: [file]
         };
 

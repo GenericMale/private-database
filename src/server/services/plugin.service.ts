@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {log} from '../utils/log';
 import {Logger} from 'log4js';
-import {SearchParameters, Plugin} from '../types';
+import {SearchParameters, Plugin, DetailResult} from '../types';
 import {SearchResult} from '../types';
 
 const PLUGIN_DIR = path.join(__dirname, '..', 'plugins');
@@ -22,13 +22,13 @@ export class PluginService {
             fs.readdirSync(PLUGIN_DIR).filter(
                 (file) => path.extname(file) === '.js'
             ).map((file) => {
-                let name = path.basename(file, '.js');
+                const name = path.basename(file, '.js');
                 this.log.info(`Loading plugins in ${name}.js ...`);
 
                 return require(path.join(PLUGIN_DIR, name));
             }).forEach(module => {
                 Object.keys(module).forEach(name => {
-                    let plugin = new module[name]();
+                    const plugin = new module[name]();
                     plugin.name = name;
                     PluginService.PLUGINS.push(plugin);
 
@@ -40,27 +40,27 @@ export class PluginService {
         return PluginService.PLUGINS;
     }
 
-    public getPlugin(plugin: string) {
+    public getPlugin(plugin: string): Plugin {
         return this.plugins.find(p => p.name === plugin);
     }
 
-    public getPlugins() {
+    public getPlugins(): Plugin[] {
         return this.plugins;
     }
 
-    public search(pluginName: string, params: SearchParameters) {
-        let plugin = this.getPlugin(pluginName);
+    public async search(pluginName: string, params: SearchParameters): Promise<SearchResult[]> {
+        const plugin = this.getPlugin(pluginName);
         if (!plugin) {
             return Promise.reject('Unknown plugin ' + pluginName);
         }
 
-        let searchParams: SearchParameters  = {};
+        const searchParams: SearchParameters  = {};
         plugin.searchParameters.forEach((param) => {
             if (params[param.name] === undefined) {
                 if (param.default) {
                     searchParams[param.name] = param.default;
                 } else if (param.required) {
-                    return Promise.reject(`Missing parameter '${param.name}'.`);
+                    //TODO: return Promise.reject(`Missing parameter '${param.name}'.`);
                 }
             } else if (param.type === 'STRING') {
                 searchParams[param.name] = params[param.name];
@@ -79,7 +79,7 @@ export class PluginService {
         return plugin.search(searchParams);
     }
 
-    public getDetails(plugin: string, searchResult: SearchResult) {
+    public async getDetails(plugin: string, searchResult: SearchResult): Promise<DetailResult> {
         return this.getPlugin(plugin).getDetails(searchResult);
     }
 

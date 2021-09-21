@@ -10,13 +10,13 @@ export async function goto(target: string): Promise<puppeteer.HTTPResponse | nul
         page = (await browser.pages())[0];
         await page.setRequestInterception(true);
         page.on('request', (request) => {
-            request.resourceType() === 'document' ? request.continue() : request.abort();
+            void (request.resourceType() === 'document' ? request.continue() : request.abort());
         });
     }
     return page.goto(target);
 }
 
-export async function load(target: string): Promise<cheerio.Root> {
+export async function load(target: string): Promise<cheerio.CheerioAPI> {
     const response = await goto(target);
     const content = await response.text();
     return cheerio.load(content);

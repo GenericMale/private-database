@@ -28,7 +28,7 @@ log4js.configure({
         default: {appenders: ['out'], level: 'trace'},
     },
 });
-let log = log4js.getLogger();
+const log = log4js.getLogger();
 
 // set up ffmpeg
 ffmpeg().getAvailableFormats((err) => {
@@ -39,7 +39,7 @@ ffmpeg().getAvailableFormats((err) => {
 });
 
 // set up container
-let container = new Container();
+const container = new Container();
 
 // set up bindings
 Object.keys(services).forEach((service) => {
@@ -70,7 +70,7 @@ hbs.registerHelper('i18n', function (phrase, ...args) {
 });
 
 // create server
-let server = new InversifyExpressServer(container, null, {rootPath: '/api'});
+const server = new InversifyExpressServer(container, null, {rootPath: '/api'});
 server.setConfig((app) => {
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
@@ -97,10 +97,10 @@ server.setErrorConfig((app) => {
     });
 });
 
-let listener = server.build().listen(
+const listener = server.build().listen(
     config.get('server.port', 80),
     config.get('server.address', '0.0.0.0'),
     () => {
-        let address = listener.address() as AddressInfo;
+        const address = listener.address() as AddressInfo;
         log.info(`Server started on http://${address.address}:${address.port}`);
     });

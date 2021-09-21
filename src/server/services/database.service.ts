@@ -27,7 +27,7 @@ export class DatabaseService {
 
             PouchDB.plugin(PouchDBFind);
             DatabaseService.DATABASE = new PouchDB(path.resolve(process.cwd(), this.dataPath, 'db'));
-            DatabaseService.DATABASE.createIndex({
+            void DatabaseService.DATABASE.createIndex({
                 index: {
                     fields: ['$entry', '$plugin']
                 }
@@ -52,7 +52,7 @@ export class DatabaseService {
         return DatabaseService.DATABASE;
     }
 
-    public getLastChange() {
+    public getLastChange(): Date {
         if (!DatabaseService.LAST_CHANGE) {
             this.updateLastChange();
         }
@@ -60,75 +60,67 @@ export class DatabaseService {
         return DatabaseService.LAST_CHANGE;
     }
 
-    public create(document: any, entry?: string) {
-        document._id = new Date().getTime() + '';
+    public async create(document: any, entry?: string): Promise<string> {
+        document._id = new Date().getTime().toString() + '';
         document.$entry = entry || document._id;
         document.$updated = new Date();
-        return this.db.put(document).then((result) => {
-            this.updateLastChange();
-            return result.id;
+
+        const result = await this.db.put(document);
+        this.updateLastChange();
+        return result.id;
+    }
+
+    public async getAll(fields?: string[]): Promise<any[]> {
+        const result = await this.db.allDocs({include_docs: true});
+        if ((<any>result).warning) {
+            this.log.warn((<any>result).warning);
+        }
+        const docs = result.rows.map((row) => row.doc);
+
+        const grouped = _.groupBy(docs, '$entry');
+        const results: any = [];
+        _.forOwn(grouped, (group) => {
+            results.push(this.merge(group));
         });
+
+        return results.filter((r: any) => r.$entry).map((r: any) => _.pick(r, ['$entry'].concat(fields)));
     }
 
-    public getAll(fields?: string[]) {
-        return this.db.allDocs({
-            include_docs: true
-        }).then((result) => {
-            if ((<any>result).warning) {
-                this.log.warn((<any>result).warning);
-            }
-            let docs = result.rows.map((row) => row.doc);
-
-            let grouped = _.groupBy(docs, '$entry');
-            let results: any = [];
-            _.forOwn(grouped, (group) => {
-                results.push(this.merge(group));
-            });
-
-            return results.filter((r: any) => r.$entry).map((r: any) => _.pick(r, ['$entry'].concat(fields)));
-        });
+    public async getFields(): Promise<string[]> {
+        const result = await this.db.query('fields', {group: true});
+        return result.rows.map(r => r.key)
     }
 
-    public getFields() {
-        return this.db.query('fields', {
-            group: true
-        }).then((result) =>
-            result.rows.map(r => r.key)
-        );
-    }
-
-    public get(entry: string, plugin?: string) {
-        return this.db.find({
+    public async get(entry: string, plugin?: string): Promise<any> {
+        const result = await this.db.find({
             selector: {
                 $entry: entry,
                 $plugin: plugin
             }
-        }).then((result) => {
-            if ((<any>result).warning) {
-                this.log.warn((<any>result).warning);
-            }
-            if (result.docs.length === 0) {
-                return Promise.reject({status: 404});
-            } else if (result.docs.length === 1) {
-                return result.docs[0];
-            } else {
-                return this.merge(result.docs);
-            }
         });
+        if ((<any>result).warning) {
+            this.log.warn((<any>result).warning);
+        }
+        if (result.docs.length === 0) {
+            return Promise.reject({status: 404});
+        } else if (result.docs.length === 1) {
+            return result.docs[0];
+        } else {
+            return this.merge(result.docs);
+        }
     }
 
-    public remove(entry: string, plugin?: string) {
-        return this.db.find({
+    public async remove(entry: string, plugin?: string): Promise<Array<PouchDB.Core.Response | PouchDB.Core.Error >> {
+        const result = await this.db.find({
             selector: {
                 $entry: entry,
                 $plugin: plugin
             }
-        }).then((result) => {
-            this.updateLastChange();
-
-            result.docs.forEach((d: any) => d['_deleted'] = true);
-            return this.db.bulkDocs(result.docs);
         });
+        this.updateLastChange();
+
+        result.docs.forEach((d: any) => d['_deleted'] = true);
+        return this.db.bulkDocs(result.docs);
     }
 
     private merge(data: any[]) {
